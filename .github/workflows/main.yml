@@ -1,0 +1,50 @@
+name: Kernel Builder
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Choose branch'
+        required: true
+        default: 'test'
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - name: Clone Kernel Source
+        env:
+          KERNEL_BRANCH: ${{ github.event.inputs.branch }}
+        run: |
+          git clone https://github.com/nunkki/android_kernel_xiaomi_munch -b "$KERNEL_BRANCH" ${{ github.workspace }}/android_kernel_xiaomi_munch --depth=1
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: /home/runner/.ccache
+          key: ${{ runner.os }}-ccache-${{ github.event.inputs.branch }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-${{ github.event.inputs.branch }}-
+
+      - name: Cache Clang
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/clang24
+          key: ${{ runner.os }}-neutron-clang-06092026
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flex bc bison make git gcc gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi ccache p7zip-full lld cpio python-is-python3 zstd wget curl zip libssl-dev libelf-dev
+
+      - name: Build Kernel
+        run: |
+          cd android_kernel_xiaomi_munch
+          git submodule update --init
+          bash build.sh
+        env:
+          TGTOKEN: ${{ secrets.TGTOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}

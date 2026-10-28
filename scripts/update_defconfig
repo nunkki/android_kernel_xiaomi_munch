@@ -38,7 +38,7 @@ export BUILD
 cd "$KERNEL_TOP" || exit
 
 # These values must be changed for forks!
-KERNEL_DEFCONFIG_URL="https://github.com/munch-devs/android_kernel_xiaomi_munch"
+KERNEL_DEFCONFIG_URL="https://github.com/nunkki/android_kernel_xiaomi_munch"
 KERNEL_DEFCONFIG_HEAD=$(git -C ${KERNEL_CFG} rev-parse HEAD)
 
 SOC="kona"
